@@ -14,88 +14,18 @@ import {
 } from 'recharts';
 import { cn } from '../lib/utils';
 import { SvgCopyButton } from './SvgCopyButton';
-
-// Mock Data
-const TASKS = [
-  { id: '1', title: '测试对话标签显示逻辑', status: '已完成', template: '普通企业年报提醒(新测)', account: '张漫', time: '2026-03-31 16:14:33', progress: '1/1' },
-  { id: '2', title: '年报', status: '已完成', template: '普通企业年报提醒(新测)', account: '张漫', time: '2026-03-27 16:19:33', progress: '2/2' },
-  { id: '3', title: '年审测试', status: '已完成', template: '普通企业年报提醒(新测)', account: '张漫', time: '2026-03-27 16:11:03', progress: '2/2' },
-  { id: '4', title: '任务', status: '已完成', template: '普通企业年报提醒(新测)', account: '张漫', time: '2026-03-25 14:16:26', progress: '1/1' },
-  { id: '5', title: '测试', status: '已完成', template: '模型测试话术', account: '张漫', time: '2026-03-24 16:25:39', progress: '1/1' },
-];
-
-const CONNECTION_RATE_DATA = [
-  { name: '接通', value: 100 },
-  { name: '未接通', value: 0 },
-];
-
-const DURATION_DATA = [
-  { name: '<=10 秒', value: 0 },
-  { name: '11~60 秒', value: 100 },
-  { name: '61~120 秒', value: 0 },
-  { name: '>120 秒', value: 0 },
-];
-
-const TREND_DATA = [
-  { date: '03-01', users: 10, dining: 5, time: 2 },
-  { date: '03-02', users: 85, dining: 40, time: 15 },
-  { date: '03-03', users: 65, dining: 30, time: 10 },
-  { date: '03-04', users: 90, dining: 45, time: 20 },
-  { date: '03-05', users: 55, dining: 25, time: 12 },
-  { date: '03-06', users: 80, dining: 35, time: 18 },
-  { date: '03-07', users: 95, dining: 50, time: 25 },
-];
-
-const REACH_TREND_DATA = [
-  { date: '03-01', rate: 60, total: 250, effective: 150 },
-  { date: '03-02', rate: 66.7, total: 240, effective: 160 },
-  { date: '03-03', rate: 53.8, total: 260, effective: 140 },
-  { date: '03-04', rate: 67.4, total: 230, effective: 155 },
-  { date: '03-05', rate: 61.1, total: 270, effective: 165 },
-  { date: '03-06', rate: 56.9, total: 255, effective: 145 },
-  { date: '03-07', rate: 61.6, total: 245, effective: 151 },
-];
-
-const QUALITY_TREND_DATA = [
-  { date: '03-01', invalid: 55, active: 1365 },
-  { date: '03-02', invalid: 50, active: 1365 },
-  { date: '03-03', invalid: 60, active: 1365 },
-  { date: '03-04', invalid: 45, active: 1365 },
-  { date: '03-05', invalid: 65, active: 1365 },
-  { date: '03-06', invalid: 55, active: 1365 },
-  { date: '03-07', invalid: 39, active: 1365 },
-];
-
-const FOCUS_POINTS = [
-  { name: '询问电费金额', count: 5, color: 'bg-blue-500' },
-  { name: '询问是否是骗子', count: 3, color: 'bg-cyan-400' },
-  { name: '体检项目咨询', count: 2, color: 'bg-emerald-400' },
-  { name: '报告领取方式', count: 2, color: 'bg-indigo-400' },
-  { name: '交通路线咨询', count: 1, color: 'bg-blue-400' },
-  { name: '停车位咨询', count: 1, color: 'bg-orange-400' },
-  { name: '用餐环境询问', count: 1, color: 'bg-red-400' },
-  { name: '其他咨询', count: 1, color: 'bg-gray-400' },
-  { name: '投诉建议', count: 1, color: 'bg-slate-400' },
-  { name: '合作咨询', count: 1, color: 'bg-sky-400' },
-];
-
-const DAILY_DATA = [
-  { date: '03-01', total: 250, connected: 150, rate: '60%', effectiveRate: '76.9%', missed: 100, invalid: 55, active: 45, users: 98 },
-  { date: '03-02', total: 240, connected: 160, rate: '66.7%', effectiveRate: '84.2%', missed: 80, invalid: 50, active: 30, users: 105 },
-  { date: '03-03', total: 260, connected: 140, rate: '53.8%', effectiveRate: '70%', missed: 120, invalid: 60, active: 60, users: 92 },
-  { date: '03-04', total: 230, connected: 155, rate: '67.4%', effectiveRate: '83.8%', missed: 75, invalid: 45, active: 30, users: 112 },
-  { date: '03-05', total: 270, connected: 165, rate: '61.1%', effectiveRate: '80.5%', missed: 105, invalid: 65, active: 40, users: 88 },
-  { date: '03-06', total: 255, connected: 145, rate: '56.9%', effectiveRate: '72.5%', missed: 110, invalid: 55, active: 55, users: 100 },
-  { date: '03-07', total: 245, connected: 151, rate: '61.6%', effectiveRate: '79.5%', missed: 94, invalid: 55, active: 39, users: 102 },
-];
-
-const QUALITY_SUMMARY_DATA = {
-  total: 1000,
-  issues: [
-    { name: '答非所问', count: 100, processed: 50, unprocessed: 50 },
-    { name: '意图识别有误', count: 100, processed: 70, unprocessed: 30 },
-  ]
-};
+import { 
+  TASKS, 
+  CONNECTION_RATE_DATA, 
+  DURATION_DATA, 
+  TREND_DATA, 
+  REACH_TREND_DATA, 
+  QUALITY_TREND_DATA, 
+  FOCUS_POINTS, 
+  DAILY_DATA, 
+  QUALITY_SUMMARY_DATA,
+  SCRIPTS_MOCK
+} from '../data/mockData';
 
 const QualitySummaryCard = ({ total, issues }: { total: number, issues: any[] }) => (
   <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
@@ -382,12 +312,7 @@ export const SystemManagement: React.FC = () => {
 
           <div className="p-6 flex-1 overflow-y-auto bg-gray-50/30 space-y-8">
             <div className="grid grid-cols-4 gap-6">
-              {[
-                { title: '普通企业年报提醒(新测)', type: '外呼', version: 'V1.2', time: '2026-03-31 16:14:33' },
-                { title: '模型测试话术', type: '外呼', version: 'V2.0', time: '2026-03-24 16:25:39' },
-                { title: '意向客户回访', type: '外呼', version: 'V1.0', time: '2026-03-20 10:11:03' },
-                { title: '活动通知话术', type: '外呼', version: 'V1.5', time: '2026-03-15 14:16:26' },
-              ].map((script, idx) => (
+              {SCRIPTS_MOCK.map((script, idx) => (
                 <div key={idx} className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
                   <div className="flex justify-between items-start mb-4">
                     <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-[#1890ff]">

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { LayoutDashboard, PhoneCall, Settings, ShieldCheck, BarChart3, Users, Download, Figma, Copy, Check, ChevronRight, ChevronDown, ListTodo, MessageSquare, FileText, Database, Monitor, Wrench, UserCheck } from 'lucide-react';
-import { elementToSVG } from 'dom-to-svg';
+import { SvgCopyButton } from './SvgCopyButton';
 
 interface AppSidebarProps {
   activeTab: string;
@@ -8,8 +8,6 @@ interface AppSidebarProps {
 }
 
 const AppSidebar: React.FC<AppSidebarProps> = ({ activeTab, onTabChange }) => {
-  const [isExporting, setIsExporting] = useState(false);
-  const [showCheck, setShowCheck] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<string[]>(['outbound_mgmt', 'scripts_mgmt']);
 
   const toggleMenu = (id: string) => {
@@ -43,83 +41,6 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ activeTab, onTabChange }) => {
     { id: 'atom_library', label: '原子库管理', icon: Database },
     { id: 'system', label: '系统管理', icon: Settings },
   ];
-
-  const handleCopyToFigma = async () => {
-    const mainElement = document.querySelector('main');
-    if (!mainElement) return;
-
-    setIsExporting(true);
-    try {
-      const clone = mainElement.cloneNode(true) as HTMLElement;
-      const originalInputs = mainElement.querySelectorAll('input, select, textarea');
-      const clonedInputs = clone.querySelectorAll('input, select, textarea');
-      
-      originalInputs.forEach((orig, i) => {
-        const cloned = clonedInputs[i] as HTMLElement;
-        const original = orig as any;
-        const replacement = document.createElement('span');
-        const style = window.getComputedStyle(original);
-        replacement.style.display = 'inline-block';
-        replacement.style.width = style.width;
-        replacement.style.height = style.height;
-        replacement.style.padding = style.padding;
-        replacement.style.fontSize = style.fontSize;
-        replacement.style.fontFamily = style.fontFamily;
-        replacement.style.color = style.color;
-        replacement.style.lineHeight = style.lineHeight;
-        replacement.style.verticalAlign = 'middle';
-        
-        if (original.tagName === 'SELECT') {
-          replacement.textContent = original.options[original.selectedIndex]?.text || '';
-          replacement.style.border = style.border;
-          replacement.style.borderRadius = style.borderRadius;
-          replacement.style.backgroundColor = style.backgroundColor;
-          replacement.style.position = 'relative';
-          const arrow = document.createElement('span');
-          arrow.textContent = '▼';
-          arrow.style.position = 'absolute';
-          arrow.style.right = '8px';
-          arrow.style.top = '50%';
-          arrow.style.transform = 'translateY(-50%) scale(0.7)';
-          arrow.style.fontSize = '10px';
-          arrow.style.color = '#999';
-          replacement.appendChild(arrow);
-        } else if (original.tagName === 'INPUT') {
-          if (original.type === 'checkbox' || original.type === 'radio') {
-            replacement.textContent = original.checked ? '✓' : '';
-            replacement.style.textAlign = 'center';
-            replacement.style.border = '1px solid #ccc';
-          } else {
-            replacement.textContent = original.value || original.placeholder || '';
-          }
-        } else {
-          replacement.textContent = original.value || '';
-        }
-        
-        if (cloned.parentNode) {
-          cloned.parentNode.replaceChild(replacement, cloned);
-        }
-      });
-
-      clone.style.position = 'fixed';
-      clone.style.top = '-9999px';
-      clone.style.left = '-9999px';
-      clone.style.width = mainElement.offsetWidth + 'px';
-      document.body.appendChild(clone);
-
-      const svgDocument = elementToSVG(clone);
-      document.body.removeChild(clone);
-
-      const svgString = new XMLSerializer().serializeToString(svgDocument);
-      await navigator.clipboard.writeText(svgString);
-      setShowCheck(true);
-      setTimeout(() => setShowCheck(false), 2000);
-    } catch (err) {
-      console.error('Export failed:', err);
-    } finally {
-      setIsExporting(false);
-    }
-  };
 
   return (
     <aside className="w-full h-full bg-[#001529] text-gray-400 flex flex-col border-r border-white/5 select-none shrink-0 overflow-hidden">
@@ -170,24 +91,10 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ activeTab, onTabChange }) => {
         ))}
 
         <div className="mt-8 px-4">
-          <button
-            onClick={handleCopyToFigma}
-            disabled={isExporting}
-            className={`w-full flex items-center gap-3 px-4 py-2 rounded transition-all duration-300 border text-xs ${
-              showCheck 
-                ? 'bg-emerald-500 border-emerald-500 text-white' 
-                : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border-white/5'
-            }`}
-          >
-            {isExporting ? (
-              <div className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-            ) : showCheck ? (
-              <Check size={14} />
-            ) : (
-              <Figma size={14} />
-            )}
-            <span>{showCheck ? '已复制' : '复制矢量图层'}</span>
-          </button>
+          <SvgCopyButton 
+            targetId="root" 
+            className="w-full bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border-white/5 justify-start px-4 py-2"
+          />
         </div>
       </nav>
     </aside>

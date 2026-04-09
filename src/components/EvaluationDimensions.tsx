@@ -3,76 +3,14 @@ import { Search, Plus, Edit2, Trash2, ChevronLeft, ChevronRight, X, ChevronDown,
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { SvgCopyButton } from './SvgCopyButton';
-
-interface Dimension {
-  id: string;
-  name: string;
-  category: string[];
-  scriptCount: number;
-  creator: string;
-  createdAt: string;
-  updatedAt: string;
-  updater: string;
-  status: boolean;
-  description?: string;
-  persona?: string;
-}
-
-interface Tag {
-  id: string;
-  name: string;
-  color: string;
-  usageCount: number;
-}
-
-const CATEGORIES = ['医疗', '业务', '素质', '情感', '流程'];
-const STATUS_OPTIONS = ['全部', '启用', '停用'];
-
-const INITIAL_DATA: Dimension[] = [
-  {
-    id: '1',
-    name: '客诉询问',
-    category: ['流程', '业务'],
-    scriptCount: 7,
-    creator: '张经理',
-    createdAt: '2024-03-01 14:20:05',
-    updatedAt: '2024-03-01 14:20:05',
-    updater: '张经理',
-    status: true,
-    description: '询问客人的投诉内容、标签、及入场描述',
-    persona: '明确制定当前的话术标签。例如：必须包含“流程”（回访确认）...'
-  },
-  {
-    id: '2',
-    name: '流程完善',
-    category: ['流程'],
-    scriptCount: 17,
-    creator: '李主管',
-    createdAt: '2024-02-15 09:12:33',
-    updatedAt: '2024-02-15 09:12:33',
-    updater: '李主管',
-    status: true,
-  },
-  {
-    id: '3',
-    name: '意图识别有误',
-    category: ['业务'],
-    scriptCount: 22,
-    creator: '王老师',
-    createdAt: '2024-03-02 16:45:12',
-    updatedAt: '2024-03-02 16:45:12',
-    updater: '王老师',
-    status: false,
-  }
-];
-
-const INITIAL_TAGS: Tag[] = [
-  { id: '1', name: '医疗', color: '#1890ff', usageCount: 12 },
-  { id: '2', name: '业务', color: '#52c41a', usageCount: 45 },
-  { id: '3', name: '素质', color: '#faad14', usageCount: 8 },
-  { id: '4', name: '情感', color: '#f5222d', usageCount: 15 },
-  { id: '5', name: '流程', color: '#722ed1', usageCount: 30 },
-];
+import { 
+  CATEGORIES, 
+  STATUS_OPTIONS, 
+  INITIAL_DATA, 
+  INITIAL_TAGS, 
+  Dimension, 
+  Tag 
+} from '../data/mockData';
 
 export const EvaluationDimensions: React.FC = () => {
   const [data, setData] = useState<Dimension[]>(INITIAL_DATA);
