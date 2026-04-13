@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, History } from 'lucide-react';
+import { X, History, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { SvgCopyButton } from './SvgCopyButton';
@@ -11,17 +11,21 @@ import {
 import { CallRecordsList } from './CallRecordsList';
 import { CallDetailModal } from './CallDetailModal';
 import { CallSessionTest } from './CallSessionTest';
+import { QualityRerunList } from './QualityRerunList';
+import { QualityRerunDetailModal } from './QualityRerunDetailModal';
+import { QualityRerunRecord } from '../data/mockData';
 
 export const CallRecords: React.FC = () => {
   const [records, setRecords] = useState<CallRecord[]>(INITIAL_RECORDS);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isFilterExpanded, setIsFilterExpanded] = useState(true);
   const [selectedRecord, setSelectedRecord] = useState<CallRecord | null>(null);
+  const [selectedRerunRecord, setSelectedRerunRecord] = useState<QualityRerunRecord | null>(null);
   const [historyNumber, setHistoryNumber] = useState<string | null>(null);
   const [isEditingWorkOrder, setIsEditingWorkOrder] = useState(false);
   const [tempWorkOrderTags, setTempWorkOrderTags] = useState<string[]>([]);
   const [bulkProcessModal, setBulkProcessModal] = useState<{ isOpen: boolean; issue: string | null }>({ isOpen: false, issue: null });
-  const [viewMode, setViewMode] = useState<'list' | 'test'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'test' | 'quality-rerun'>('list');
   const [testPhoneNumber, setTestPhoneNumber] = useState('');
   const [testMessages, setTestMessages] = useState<ChatMessage[]>([
     { role: 'bot', content: '欸 你好！这里是东漱社区社区医院，请问是梁俊升本人嘛？' }
@@ -35,55 +39,81 @@ export const CallRecords: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col bg-[#f0f2f5] overflow-hidden" id="call-records-page">
-      {/* Breadcrumbs & Tabs */}
+      {/* Top Navigation Bar */}
       <div className="bg-white border-b border-gray-200 shrink-0">
-        <div className="px-6 py-2 flex items-center gap-2 text-xs text-gray-400">
-          <History size={12} />
-          <span>概览</span>
-          <span>/</span>
-          <span className="text-gray-900">通话详情</span>
-        </div>
-        <div className="px-6 flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            <div 
-              onClick={() => setViewMode('list')}
-              className={cn(
-                "px-4 py-2 text-sm cursor-pointer hover:bg-gray-50 transition-colors",
-                viewMode === 'list' ? "text-[#1890ff] bg-[#e6f7ff] border-b-2 border-[#1890ff] font-medium" : "text-gray-500"
-              )}
-            >
-              通话详情
-            </div>
-            <div 
-              onClick={() => setViewMode('test')}
-              className={cn(
-                "px-4 py-2 text-sm cursor-pointer hover:bg-gray-50 transition-colors",
-                viewMode === 'test' ? "text-[#1890ff] bg-[#e6f7ff] border-b-2 border-[#1890ff] font-medium" : "text-gray-500"
-              )}
-            >
-              会话测试
+        <div className="px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button className="flex items-center gap-1 text-gray-600 hover:text-[#1890ff] transition-colors">
+              <ChevronLeft size={18} />
+              <span className="text-sm">返回</span>
+            </button>
+            <div className="h-4 w-[1px] bg-gray-200" />
+            <div className="flex items-center gap-2 text-xs text-gray-400">
+              <span>首页</span>
+              <span>/</span>
+              <span>话术管理 (管理端)</span>
+              <span>/</span>
+              <span className="text-gray-900 font-medium">配置</span>
             </div>
           </div>
-          {viewMode === 'list' && (
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => {
-                  if (selectedIds.length === 0) return;
-                  setRecords(prev => prev.map(r => selectedIds.includes(r.id) ? { ...r, status: '已处理' } : r));
-                  setSelectedIds([]);
-                }}
-                disabled={selectedIds.length === 0}
-                className="text-xs bg-[#1890ff] text-white px-3 py-1 rounded disabled:opacity-50 hover:bg-[#40a9ff]"
-              >
-                批量处理
-              </button>
+          <div className="flex items-center bg-gray-100 rounded-lg p-1">
+            <button 
+              onClick={() => setViewMode('list')}
+              className={cn(
+                "px-6 py-1.5 rounded-md text-sm transition-all",
+                viewMode === 'list' ? "bg-white text-gray-900 shadow-sm font-bold scale-110" : "text-gray-400"
+              )}
+            >
+              管理端
+            </button>
+            <button 
+              onClick={() => setViewMode('test')}
+              className={cn(
+                "px-6 py-1.5 rounded-md text-sm transition-all",
+                viewMode === 'test' ? "bg-white text-gray-900 shadow-sm font-bold scale-110" : "text-gray-400"
+              )}
+            >
+              客户端
+            </button>
+            <button 
+              onClick={() => setViewMode('quality-rerun')}
+              className={cn(
+                "px-6 py-1.5 rounded-md text-sm transition-all",
+                viewMode === 'quality-rerun' ? "bg-white text-gray-900 shadow-sm font-bold scale-110" : "text-gray-400"
+              )}
+            >
+              质检重跑
+            </button>
+          </div>
+          <div className="w-40" /> {/* Spacer for balance */}
+        </div>
+
+        <div className="px-6 flex items-center gap-1">
+          <div 
+            className={cn(
+              "px-6 py-3 text-sm cursor-pointer transition-colors relative",
+              viewMode === 'list' ? "text-[#1890ff] font-bold" : "text-gray-500"
+            )}
+          >
+            概览
+          </div>
+          <div 
+            className={cn(
+              "px-6 py-3 text-sm cursor-pointer transition-colors relative",
+              viewMode === 'list' ? "text-[#1890ff] font-bold" : "text-gray-500"
+            )}
+          >
+            外呼记录
+            <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#1890ff]" />
+            <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-blue-50 text-[#1890ff] text-[10px] flex items-center justify-center rounded-sm">
+              <X size={10} />
             </div>
-          )}
+          </div>
         </div>
       </div>
 
       <main className="flex-1 p-4 overflow-y-auto space-y-4">
-        {viewMode === 'list' ? (
+        {viewMode === 'list' && (
           <CallRecordsList 
             records={records}
             setRecords={setRecords}
@@ -96,8 +126,10 @@ export const CallRecords: React.FC = () => {
             setBulkProcessModal={setBulkProcessModal}
             filters={filters}
             setFilters={setFilters}
+            setViewMode={setViewMode}
           />
-        ) : (
+        )}
+        {viewMode === 'test' && (
           <CallSessionTest 
             setViewMode={setViewMode}
             testPhoneNumber={testPhoneNumber}
@@ -106,6 +138,11 @@ export const CallRecords: React.FC = () => {
             setTestMessages={setTestMessages}
             testInput={testInput}
             setTestInput={setTestInput}
+          />
+        )}
+        {viewMode === 'quality-rerun' && (
+          <QualityRerunList 
+            onViewDetail={setSelectedRerunRecord}
           />
         )}
       </main>
@@ -229,6 +266,11 @@ export const CallRecords: React.FC = () => {
           </div>
         )}
       </AnimatePresence>
+      {/* Quality Rerun Detail Modal */}
+      <QualityRerunDetailModal 
+        record={selectedRerunRecord}
+        onClose={() => setSelectedRerunRecord(null)}
+      />
     </div>
   );
 };

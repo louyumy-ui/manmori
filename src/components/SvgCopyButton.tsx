@@ -38,12 +38,18 @@ export const SvgCopyButton: React.FC<SvgCopyButtonProps> = ({ targetId, classNam
   const domToSvg = (element: Element, offsetX = 0, offsetY = 0): string => {
     if (!(element instanceof HTMLElement || element instanceof SVGElement)) return '';
     
+    // Support for explicit ignore attribute
+    if (element.getAttribute('data-svg-copy-ignore') === 'true') return '';
+
     const styles = getElementStyles(element);
     if (styles.visibility === 'hidden' || styles.opacity === '0' || styles.display === 'none') return '';
 
     const rect = element.getBoundingClientRect();
     const x = rect.left - offsetX;
     const y = rect.top - offsetY;
+
+    const idAttr = element.id ? ` id="${element.id}"` : '';
+    const classAttr = element.className && typeof element.className === 'string' ? ` class="${element.className.split(' ').slice(0, 3).join(' ')}"` : '';
 
     let svgParts: string[] = [];
 
@@ -112,6 +118,9 @@ export const SvgCopyButton: React.FC<SvgCopyButtonProps> = ({ targetId, classNam
           svgParts.push(`<path d="M0 0l4 4 4-4" transform="translate(${arrowX}, ${arrowY})" stroke="#94a3b8" stroke-width="1.5" fill="none" />`);
         }
       }
+      
+      // Skip child nodes for these elements to prevent duplication
+      return `<g transform="translate(${x}, ${y})"${idAttr}${classAttr} data-tag="${element.tagName.toLowerCase()}">\n${svgParts.join('\n')}\n</g>`;
     }
 
     for (const node of Array.from(element.childNodes)) {
@@ -143,9 +152,6 @@ export const SvgCopyButton: React.FC<SvgCopyButtonProps> = ({ targetId, classNam
     Array.from(element.children).forEach(child => {
       svgParts.push(domToSvg(child, rect.left, rect.top));
     });
-
-    const idAttr = element.id ? ` id="${element.id}"` : '';
-    const classAttr = element.className && typeof element.className === 'string' ? ` class="${element.className.split(' ').slice(0, 3).join(' ')}"` : '';
 
     return `<g transform="translate(${x}, ${y})"${idAttr}${classAttr} data-tag="${element.tagName.toLowerCase()}">\n${svgParts.join('\n')}\n</g>`;
   };

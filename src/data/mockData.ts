@@ -85,10 +85,10 @@ export const QUALITY_SUMMARY_DATA = {
 };
 
 export const SCRIPTS_MOCK = [
-  { title: '普通企业年报提醒(新测)', type: '外呼', version: 'V1.2', time: '2026-03-31 16:14:33' },
-  { title: '模型测试话术', type: '外呼', version: 'V2.0', time: '2026-03-24 16:25:39' },
-  { title: '意向客户回访', type: '外呼', version: 'V1.0', time: '2026-03-20 10:11:03' },
-  { title: '活动通知话术', type: '外呼', version: 'V1.5', time: '2026-03-15 14:16:26' },
+  { id: '1', title: '普通企业年报提醒(新测)', type: '外呼', version: 'V1.2', time: '2026-03-31 16:14:33' },
+  { id: '2', title: '模型测试话术', type: '外呼', version: 'V2.0', time: '2026-03-24 16:25:39' },
+  { id: '3', title: '意向客户回访', type: '外呼', version: 'V1.0', time: '2026-03-20 10:11:03' },
+  { id: '4', title: '活动通知话术', type: '外呼', version: 'V1.5', time: '2026-03-15 14:16:26' },
 ];
 
 // --- Call Records Data ---
@@ -115,14 +115,14 @@ export interface CallRecord {
   taskName: string;
   phoneNumber: string;
   callTime: string;
-  answerStatus: '已接' | '未接';
+  answerStatus: '已接听' | '未接听' | '排队超时' | '用户挂断';
   phoneStatus: '呼叫成功' | '响铃未接' | '排队超时' | '号码挂断';
   duration: number; // seconds
   recordingUrl: string;
   dialogTags: string[];
   workOrderTags: string[];
   summary: string;
-  source: '主动呼出' | '回拨呼入' | '其他呼入';
+  source: '主动呼出' | '回拨呼入' | '陌生呼入';
   transferToHuman: {
     triggered: boolean;
     number?: string;
@@ -149,7 +149,7 @@ export const INITIAL_RECORDS: CallRecord[] = [
     taskName: '业务体验任务',
     phoneNumber: '188****4221',
     callTime: '2026-03-18 15:31:50',
-    answerStatus: '已接',
+    answerStatus: '已接听',
     phoneStatus: '呼叫成功',
     duration: 98,
     recordingUrl: '#',
@@ -193,14 +193,14 @@ export const INITIAL_RECORDS: CallRecord[] = [
     taskName: '老年人体检任务',
     phoneNumber: '188****4221',
     callTime: '2026-03-18 15:30:00',
-    answerStatus: '已接',
-    phoneStatus: '呼叫成功',
+    answerStatus: '未接听',
+    phoneStatus: '响铃未接',
     duration: 40,
     recordingUrl: '#',
     dialogTags: ['不参加'],
     workOrderTags: [],
     summary: '用户表示已做过体检，不参与本次免费体检',
-    source: '主动呼出',
+    source: '回拨呼入',
     transferToHuman: { triggered: false },
     qualityType: '非关键点',
     qualityIssue: ['重复追问'],
@@ -230,14 +230,14 @@ export const INITIAL_RECORDS: CallRecord[] = [
     taskName: '老年人体检任务',
     phoneNumber: '151****6125',
     callTime: '2026-03-18 15:21:04',
-    answerStatus: '已接',
-    phoneStatus: '呼叫成功',
+    answerStatus: '排队超时',
+    phoneStatus: '排队超时',
     duration: 57,
     recordingUrl: '#',
     dialogTags: ['参加'],
     workOrderTags: ['时间:周一', '早餐:吃', '知悉所有事项:是'],
     summary: '用户预约周一体检，选择吃早餐并确认知悉空腹、禁水及带身份证要求',
-    source: '主动呼出',
+    source: '陌生呼入',
     transferToHuman: { triggered: false },
     qualityType: '-',
     qualityIssue: [],
@@ -327,4 +327,188 @@ export const INITIAL_TAGS: Tag[] = [
   { id: '3', name: '素质', color: '#faad14', usageCount: 8 },
   { id: '4', name: '情感', color: '#f5222d', usageCount: 15 },
   { id: '5', name: '流程', color: '#722ed1', usageCount: 30 },
+];
+
+export interface QualityRerunRecord {
+  id: string;
+  scriptName: string;
+  calledNumber: string;
+  dimension: string;
+  rerunCount: number;
+  latestResult: '❌有问题' | '✅没问题';
+  rerunTime: string;
+  operator: string;
+  status: '重跑中' | '已完成' | '重跑失败';
+  reason?: string;
+  context: ChatMessage[];
+  problemRound: number;
+  newAnswer?: string;
+  personaVersion: string;
+  qualityVersion: string;
+}
+
+export const QUALITY_RERUN_RECORDS: QualityRerunRecord[] = [
+  {
+    id: '1',
+    scriptName: '业务体验',
+    calledNumber: '188****4221',
+    dimension: '答非所问',
+    rerunCount: 2,
+    latestResult: '✅没问题',
+    rerunTime: '2026-04-13 10:30:00',
+    operator: '运营-俊生',
+    status: '已完成',
+    reason: '重跑后AI正确识别了用户“我是小爱助理”的意图，并引导询问是否认识本人，逻辑正确。',
+    problemRound: 1,
+    newAnswer: '那你认识梁军升吗？能不能代他回答几个问题呀？',
+    personaVersion: 'v1.2.3',
+    qualityVersion: 'v2.1.0',
+    context: [
+      { role: 'bot', content: '欸 你好！我们这边是东漱社区医院的，请问是梁军升本人嘛？' },
+      { role: 'user', content: '我是小爱助理呀，你是有什么事吗？' },
+      { role: 'bot', content: '那你认识梁军升吗？能不能代他回答几个问题呀？' },
+    ]
+  },
+  {
+    id: '2',
+    scriptName: '老年人体检',
+    calledNumber: '151****6125',
+    dimension: '幻觉',
+    rerunCount: 1,
+    latestResult: '❌有问题',
+    rerunTime: '2026-04-13 10:35:00',
+    operator: '运营-俊生',
+    status: '重跑中',
+    problemRound: 2,
+    personaVersion: 'v1.2.3',
+    qualityVersion: 'v2.0.5',
+    context: [
+      { role: 'bot', content: '您好，请问您周一有空参加体检吗？' },
+      { role: 'user', content: '有空的，需要注意什么吗？' },
+      { role: 'bot', content: '需要空腹24小时哦。' }, // Hallucination
+    ]
+  }
+];
+
+export const REVISION_LOGS = [
+  {
+    id: '1',
+    operator: '运营-俊生',
+    type: '修改了',
+    version: 'v1.2.3',
+    description: '语音合成开场白',
+    oldData: '欸 你好！这里是...',
+    newData: '欸 你好！这里是东漱社区...',
+    time: '2026-04-03 15:12:06'
+  },
+  {
+    id: '2',
+    operator: '运营-俊生',
+    type: '修改了',
+    version: 'v1.2.2',
+    description: '人设',
+    oldData: '身份:桥中街道...',
+    newData: '角色身份 你是...',
+    time: '2026-04-03 15:11:56'
+  },
+  {
+    id: '3',
+    operator: '运营-俊生',
+    type: '修改了',
+    version: 'v1.2.1',
+    description: '参数配置',
+    oldData: '{"temperature": 0.7}',
+    newData: '{"temperature": 0.8}',
+    time: '2026-04-02 16:00:54'
+  },
+  {
+    id: '4',
+    operator: '运营-俊生',
+    type: '修改了',
+    version: 'v1.2.0',
+    description: '模型配置模板',
+    oldData: '开源-qwen3.5-fl...',
+    newData: 'qwen3-next-80...',
+    time: '2026-04-02 16:00:54'
+  },
+  {
+    id: '5',
+    operator: '运营-俊生',
+    type: '修改了',
+    version: 'v1.1.9',
+    description: '参数配置',
+    oldData: '{"temperature": 0.6}',
+    newData: '{"temperature": 0.7}',
+    time: '2026-03-25 14:14:53'
+  },
+  {
+    id: '6',
+    operator: '运营-俊生',
+    type: '修改了',
+    version: 'v1.1.8',
+    description: '模型配置模板',
+    oldData: '开源-qwen3.5-1...',
+    newData: '开源-qwen3.5-fl...',
+    time: '2026-03-25 14:14:24'
+  },
+  {
+    id: '7',
+    operator: '运营-俊生',
+    type: '修改了',
+    version: 'v1.1.7',
+    description: '模型配置模板',
+    oldData: '开源-qwen35-3...',
+    newData: '开源-qwen3.5-1...',
+    time: '2026-03-25 14:13:30'
+  },
+  {
+    id: '8',
+    operator: '运营-俊生',
+    type: '修改了',
+    version: 'v1.1.6',
+    description: '模型配置模板',
+    oldData: 'qwen3-next-80...',
+    newData: '开源-qwen3.5-fl...',
+    time: '2026-03-25 14:11:09'
+  },
+  {
+    id: '9',
+    operator: '运营-俊生',
+    type: '修改了',
+    version: 'v1.1.5',
+    description: '语音合成开场白',
+    oldData: '欸 你好！我们...',
+    newData: '欸 你好！这里...',
+    time: '2026-03-20 10:17:09'
+  },
+  {
+    id: '10',
+    operator: '运营-俊生',
+    type: '修改了',
+    version: 'v1.1.4',
+    description: '人设',
+    oldData: '身份:东漱社区...',
+    newData: '身份:桥中街道...',
+    time: '2026-03-20 10:17:09'
+  },
+  {
+    id: '11',
+    operator: '超级管理员',
+    type: '修改了',
+    version: 'v1.1.3',
+    description: '模型配置模板',
+    oldData: 'Moonshot-Kimi...',
+    newData: 'qwen3-next-80...',
+    time: '2026-03-16 11:46:36'
+  },
+  {
+    id: '12',
+    operator: '超级管理员',
+    type: '修改了',
+    version: 'v1.1.2',
+    description: '参数配置',
+    oldData: '{"temperature": 0.5}',
+    newData: '{"temperature": 0.6}',
+    time: '2026-03-16 11:46:36'
+  }
 ];

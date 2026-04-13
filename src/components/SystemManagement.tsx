@@ -68,9 +68,11 @@ export const SystemManagement: React.FC = () => {
   const [activeSubTab, setActiveSubTab] = useState<'task' | 'script'>('task');
   const [activeAnalysisTab, setActiveAnalysisTab] = useState<'ongoing' | 'completed' | 'analysis'>('analysis');
   const [selectedTaskId, setSelectedTaskId] = useState('5');
+  const [selectedScriptId, setSelectedScriptId] = useState('1');
   const [searchQuery, setSearchQuery] = useState('');
 
   const selectedTask = TASKS.find(t => t.id === selectedTaskId) || TASKS[0];
+  const selectedScript = SCRIPTS_MOCK.find(s => s.id === selectedScriptId) || SCRIPTS_MOCK[0];
 
   return (
     <div className="flex-1 flex flex-col bg-[#f0f2f5] overflow-hidden" id="system-management-page">
@@ -298,36 +300,54 @@ export const SystemManagement: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex flex-col bg-white overflow-hidden">
-          {/* Script Management View */}
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
-            <h2 className="text-lg font-bold text-gray-800">话术管理</h2>
-            <div className="flex items-center gap-3">
-              <button className="px-4 py-2 bg-[#1890ff] text-white rounded text-sm font-medium hover:bg-[#40a9ff] transition-colors flex items-center gap-2">
-                <Plus size={16} />
+        <div className="flex-1 flex overflow-hidden">
+          {/* Left Sidebar: Script List */}
+          <div className="w-72 bg-white border-r border-gray-200 flex flex-col shrink-0">
+            <div className="p-4 border-b border-gray-100 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1 text-sm text-gray-600 cursor-pointer hover:text-[#1890ff]">
+                  <span>全部话术</span>
+                  <ChevronDown size={14} />
+                </div>
+                <button className="p-1 hover:bg-gray-100 rounded transition-colors" title="刷新">
+                  <RotateCcw size={14} className="text-gray-400" />
+                </button>
+              </div>
+              <button className="w-full py-2 bg-[#1890ff] text-white rounded text-sm font-medium hover:bg-[#40a9ff] transition-colors shadow-sm">
                 新建话术
               </button>
+              <div className="relative">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input 
+                  type="text" 
+                  placeholder="搜索话术名称" 
+                  className="w-full pl-9 pr-3 py-1.5 border border-gray-200 rounded text-xs focus:outline-none focus:border-[#1890ff]"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="p-6 flex-1 overflow-y-auto bg-gray-50/30 space-y-8">
-            <div className="grid grid-cols-4 gap-6">
-              {SCRIPTS_MOCK.map((script, idx) => (
-                <div key={idx} className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-[#1890ff]">
-                      <MessageSquare size={20} />
-                    </div>
-                    <button className="text-gray-300 hover:text-gray-600">
-                      <MoreHorizontal size={18} />
-                    </button>
+            <div className="flex-1 overflow-y-auto p-2 space-y-2 bg-gray-50/50">
+              {SCRIPTS_MOCK.map(script => (
+                <div 
+                  key={script.id}
+                  onClick={() => setSelectedScriptId(script.id)}
+                  className={cn(
+                    "p-3 rounded-lg border transition-all cursor-pointer group",
+                    selectedScriptId === script.id 
+                      ? "bg-white border-[#1890ff] shadow-md ring-1 ring-[#1890ff]/10" 
+                      : "bg-white border-gray-100 hover:border-gray-200 hover:shadow-sm"
+                  )}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className={cn(
+                      "text-xs font-bold truncate pr-2",
+                      selectedScriptId === script.id ? "text-[#1890ff]" : "text-gray-800"
+                    )}>{script.title}</h3>
+                    <span className="text-[10px] px-1.5 py-0.5 bg-blue-50 text-blue-500 rounded shrink-0">{script.type}</span>
                   </div>
-                  <h3 className="font-bold text-gray-800 mb-2 group-hover:text-[#1890ff] transition-colors">{script.title}</h3>
-                  <div className="space-y-2 text-xs text-gray-400">
-                    <div className="flex justify-between">
-                      <span>类型:</span>
-                      <span className="text-gray-600">{script.type}</span>
-                    </div>
+                  <div className="space-y-1 text-[10px] text-gray-400">
                     <div className="flex justify-between">
                       <span>版本:</span>
                       <span className="text-gray-600">{script.version}</span>
@@ -337,16 +357,32 @@ export const SystemManagement: React.FC = () => {
                       <span className="text-gray-600">{script.time}</span>
                     </div>
                   </div>
-                  <div className="mt-6 pt-4 border-t border-gray-50 flex justify-end gap-3">
-                    <button className="text-[#1890ff] font-medium hover:underline">编辑</button>
-                    <button className="text-gray-400 hover:text-gray-600 font-medium">查看</button>
-                  </div>
                 </div>
               ))}
             </div>
+          </div>
 
-            {/* Quality Inspection Summary */}
-            <QualitySummaryCard total={QUALITY_SUMMARY_DATA.total} issues={QUALITY_SUMMARY_DATA.issues} />
+          {/* Main Content: Script Analysis */}
+          <div className="flex-1 flex flex-col overflow-hidden bg-white">
+            {/* Script Header */}
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <h2 className="text-lg font-bold text-gray-800">{selectedScript.title}</h2>
+                <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-500 rounded font-medium">{selectedScript.version}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <button className="px-4 py-1.5 border border-gray-200 text-gray-600 rounded text-sm hover:bg-gray-50 transition-colors">
+                  编辑话术
+                </button>
+                <button className="px-4 py-1.5 bg-[#1890ff] text-white rounded text-sm font-medium hover:bg-[#40a9ff] transition-colors">
+                  发布版本
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-gray-50/30">
+              {/* Quality Inspection Summary */}
+              <QualitySummaryCard total={QUALITY_SUMMARY_DATA.total} issues={QUALITY_SUMMARY_DATA.issues} />
 
             {/* Task Results Depth Analysis (Moved from Task Management) */}
             <div className="pt-8 border-t border-gray-200 space-y-8">
@@ -634,9 +670,10 @@ export const SystemManagement: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
-    </div>
-  );
+      </div>
+    )}
+  </div>
+);
 };
 
 export default SystemManagement;
