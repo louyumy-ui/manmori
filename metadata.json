@@ -1,5 +1,6 @@
 {
-  "name": "智策云语管理系统",
+  "name": "智策云语管理系统--质检",
   "description": "专业的外呼话术与评估维度管理平台，支持矢量导出与精细化权限控制。",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "majorCapabilities": []
 }

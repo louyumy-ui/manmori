@@ -109,6 +109,19 @@ export interface QualityHit {
   reason: string;
 }
 
+export interface QualityPoint {
+  roundNo: number;
+  ruleName: string;
+  reason: string;
+  isAssociated: '是' | '否';
+  affectedRounds: number[];
+}
+
+export interface QualityInspection {
+  keyPoints: QualityPoint[];
+  nonKeyPoints: QualityPoint[];
+}
+
 export interface CallRecord {
   id: string;
   scriptName: string;
@@ -133,6 +146,7 @@ export interface CallRecord {
   qualityType: '关键点' | '非关键点' | '-';
   qualityIssue: string[];
   qualityHits: QualityHit[];
+  qualityInspection?: QualityInspection;
   status: '已处理' | '未处理';
   capturedInfo: CapturedInfo[];
   chatTranscript: ChatMessage[];
@@ -167,6 +181,25 @@ export const INITIAL_RECORDS: CallRecord[] = [
         reason: '工单记录用户表示“有糖尿病”，但通话中客户明确否认“不准确啊，我都没病”，工单信息与通话实况不符，属于捏造事实。' 
       }
     ],
+    qualityInspection: {
+      keyPoints: [
+        {
+          roundNo: 2,
+          ruleName: '幻觉检测',
+          reason: 'AI将机构地址错误表述为“东山花园”，与基准库明确规定的“芳村花园”地址严重不符，属于捏造基准库以外信息。该事实错误直接导致第3轮AI继续复述错误地址。',
+          isAssociated: '是',
+          affectedRounds: [3]
+        },
+        {
+          roundNo: 6,
+          ruleName: '幻觉检测',
+          reason: 'AI在解答客户疑问时，将基准库定义的核心产品“足背动脉健康卡”擅自更改为“糖尿病卡”，偏离业务基准，属于信息捏造与概念混淆。',
+          isAssociated: '否',
+          affectedRounds: []
+        }
+      ],
+      nonKeyPoints: []
+    },
     status: '未处理',
     creator: '运营-俊生',
     template: '广州健康通调研-普通话版-东漱社区医院',
@@ -358,15 +391,16 @@ export const QUALITY_RERUN_RECORDS: QualityRerunRecord[] = [
     rerunTime: '2026-04-13 10:30:00',
     operator: '运营-俊生',
     status: '已完成',
-    reason: '重跑后AI正确识别了用户“我是小爱助理”的意图，并引导询问是否认识本人，逻辑正确。',
-    problemRound: 1,
-    newAnswer: '那你认识梁军升吗？能不能代他回答几个问题呀？',
+    reason: '无',
+    problemRound: 0,
+    newAnswer: '可以的，服药不影响体检。',
     personaVersion: 'v1.2.3',
     qualityVersion: 'v2.1.0',
     context: [
-      { role: 'bot', content: '欸 你好！我们这边是东漱社区医院的，请问是梁军升本人嘛？' },
-      { role: 'user', content: '我是小爱助理呀，你是有什么事吗？' },
-      { role: 'bot', content: '那你认识梁军升吗？能不能代他回答几个问题呀？' },
+      { role: 'user', content: '我有基础病，早上能不能吃完药再来体检？' },
+      { role: 'bot', content: '是哒，有基础病也可以体检。' },
+      { role: 'user', content: '我有基础病，早上能不能吃完药再来体检？' },
+      { role: 'bot', content: '可以的，服药不影响体检。' },
     ]
   },
   {

@@ -28,6 +28,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
   tempWorkOrderTags,
   setTempWorkOrderTags,
 }) => {
+  const [activeTab, setActiveTab] = useState<'detail' | 'revision'>('detail');
   const [isRerunning, setIsRerunning] = useState(false);
   const [isRerunningQuality, setIsRerunningQuality] = useState(false);
   const [rerunResults, setRerunResults] = useState<any[]>([]);
@@ -38,7 +39,6 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
 
   const handleRerun = () => {
     setIsRerunning(true);
-    // Simulate AI generation based on context
     setTimeout(() => {
       const results = selectedRecord.chatTranscript.map((msg, idx) => {
         if (msg.role === 'bot') {
@@ -58,7 +58,6 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
   const handleQualityRerun = (mode: 'full' | 'dimension', dimension?: string) => {
     setIsRerunningQuality(true);
     setShowQualityRerunMenu(false);
-    // Simulate Quality Inspection Rerun
     setTimeout(() => {
       const results = [
         { dimension: '答非所问', status: '已修复', detail: '携带上下文重跑后，AI已能正确识别用户意图，不再出现幻觉回答。' },
@@ -79,14 +78,14 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSelectedRecord(null)}
-            className="absolute inset-0 bg-black/45"
+            className="absolute inset-0 bg-black/45 backdrop-blur-sm"
           />
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             id="call-detail-modal"
-            className="bg-white h-[90vh] w-full max-w-6xl relative shadow-2xl flex flex-col rounded-lg overflow-hidden"
+            className="bg-white h-[90vh] w-full max-w-[1400px] relative shadow-2xl flex flex-col rounded-lg overflow-hidden"
           >
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white shrink-0">
@@ -120,32 +119,12 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                         exit={{ opacity: 0, y: 10 }}
                         className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 py-2 z-50"
                       >
-                        <button 
-                          onClick={() => handleQualityRerun('full')}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                        >
-                          全量重跑
-                        </button>
+                        <button onClick={() => handleQualityRerun('full')} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">全量重跑</button>
                         <div className="h-[1px] bg-gray-100 my-1" />
                         <div className="px-4 py-1 text-[10px] text-gray-400 font-bold uppercase tracking-wider">按维度重跑</div>
-                        <button 
-                          onClick={() => handleQualityRerun('dimension', '答非所问')}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                        >
-                          答非所问
-                        </button>
-                        <button 
-                          onClick={() => handleQualityRerun('dimension', '关键点遗漏')}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                        >
-                          关键点遗漏
-                        </button>
-                        <button 
-                          onClick={() => handleQualityRerun('dimension', '幻觉检测')}
-                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                        >
-                          幻觉检测
-                        </button>
+                        <button onClick={() => handleQualityRerun('dimension', '答非所问')} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">答非所问</button>
+                        <button onClick={() => handleQualityRerun('dimension', '关键点遗漏')} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">关键点遗漏</button>
+                        <button onClick={() => handleQualityRerun('dimension', '幻觉检测')} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">幻觉检测</button>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -169,99 +148,13 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
               </div>
             </div>
 
-            {/* Modal Content */}
-            <div className="flex-1 flex overflow-hidden">
-              {/* Left Side: Chat Transcript */}
-              <div className="flex-1 flex flex-col border-r border-gray-100 bg-gray-50/30">
-                <div className="p-4 border-b border-gray-100 bg-white flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-gray-700">对话流水</span>
-                    {rerunResults.length > 0 && (
-                      <span className="text-[10px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded flex items-center gap-1">
-                        <Sparkles size={10} />
-                        已应用新人设重跑
-                      </span>
-                    )}
-                    {qualityRerunResults.length > 0 && (
-                      <span className="text-[10px] bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded flex items-center gap-1">
-                        <ShieldCheck size={10} />
-                        质检重跑完成
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-4 text-xs text-gray-400">
-                    <span>对话轮次: <span className="text-gray-700 font-medium">{selectedRecord.rounds}</span></span>
-                    <span>拨打次数: <span className="text-gray-700 font-medium">{selectedRecord.dialCount}</span></span>
-                  </div>
-                </div>
-                <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                  {qualityRerunResults.length > 0 && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: -20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="bg-emerald-50 border border-emerald-100 rounded-lg p-4 mb-6 space-y-3"
-                    >
-                      <div className="flex items-center justify-between">
-                        <h5 className="text-sm font-bold text-emerald-800 flex items-center gap-2">
-                          <ShieldCheck size={16} />
-                          质检重跑分析报告
-                        </h5>
-                        <button onClick={() => setQualityRerunResults([])} className="text-emerald-400 hover:text-emerald-600">
-                          <X size={14} />
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-1 gap-2">
-                        {qualityRerunResults.map((res, i) => (
-                          <div key={i} className="bg-white/60 p-2 rounded text-xs border border-emerald-50">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="font-bold text-gray-700">【{res.dimension}】</span>
-                              <span className={cn(
-                                "px-1.5 py-0.5 rounded text-[10px]",
-                                res.status === '已修复' || res.status === '已消除' ? "bg-emerald-100 text-emerald-700" : "bg-blue-100 text-blue-700"
-                              )}>{res.status}</span>
-                            </div>
-                            <p className="text-gray-500">{res.detail}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                  {selectedRecord.chatTranscript.map((msg, idx) => {
-                    const rerunMsg = rerunResults[idx];
-                    return (
-                      <div key={idx} className="space-y-2">
-                        <div className={cn(
-                          "flex gap-3 max-w-[85%]",
-                          msg.role === 'user' ? "ml-auto flex-row-reverse" : ""
-                        )}>
-                          <div className={cn(
-                            "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-                            msg.role === 'bot' ? "bg-[#1890ff] text-white" : "bg-gray-200 text-gray-500"
-                          )}>
-                            {msg.role === 'bot' ? <Bot size={16} /> : <User size={16} />}
-                          </div>
-                          <div className={cn(
-                            "p-3 rounded-xl text-sm leading-relaxed relative group",
-                            msg.role === 'bot' ? "bg-white text-gray-700 shadow-sm border border-gray-100" : "bg-[#1890ff] text-white"
-                          )}>
-                            {msg.content}
-                            {rerunMsg?.changed && (
-                              <div className="mt-2 pt-2 border-t border-purple-50 text-purple-600 bg-purple-50/50 p-2 rounded text-xs animate-in fade-in slide-in-from-top-1">
-                                <div className="flex items-center gap-1 mb-1 font-bold">
-                                  <Sparkles size={10} />
-                                  新人设重跑结果：
-                                </div>
-                                {rerunMsg.new}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                {/* Audio Player Placeholder */}
-                <div className="p-4 bg-white border-t border-gray-100">
+            {/* Modal Content - 3 Columns */}
+            <div className="flex-1 flex overflow-hidden bg-gray-50/30">
+              
+              {/* Column 1: Dialogue (Left) */}
+              <div className="w-[450px] flex flex-col border-r border-gray-100 bg-white">
+                {/* Audio Player */}
+                <div className="p-4 border-b border-gray-100 bg-white">
                   <div className="flex items-center gap-4 bg-gray-50 rounded-full px-4 py-2">
                     <button className="w-8 h-8 bg-[#1890ff] text-white rounded-full flex items-center justify-center">
                       <Play size={14} fill="currentColor" />
@@ -272,216 +165,267 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                     <span className="text-xs text-gray-400">01:24 / 03:15</span>
                   </div>
                 </div>
+                {/* Transcript */}
+                <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50/20">
+                  {selectedRecord.chatTranscript.map((msg, idx) => (
+                    <div key={idx} className={cn(
+                      "flex gap-3 max-w-[90%]",
+                      msg.role === 'user' ? "ml-auto flex-row-reverse" : ""
+                    )}>
+                      <div className={cn(
+                        "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
+                        msg.role === 'bot' ? "bg-[#1890ff] text-white" : "bg-gray-200 text-gray-500"
+                      )}>
+                        {msg.role === 'bot' ? <Bot size={16} /> : <User size={16} />}
+                      </div>
+                      <div className={cn(
+                        "p-3 rounded-xl text-sm leading-relaxed shadow-sm border",
+                        msg.role === 'bot' ? "bg-white text-gray-700 border-gray-100" : "bg-[#1890ff] text-white border-[#1890ff]"
+                      )}>
+                        {msg.content}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* Right Side: Analysis & Info */}
-              <div className="w-[400px] overflow-y-auto p-6 space-y-8 bg-white">
-                {/* Basic Info */}
-                <section className="space-y-4">
+              {/* Column 2: Quality Inspection (Middle) */}
+              <div className="flex-1 flex flex-col border-r border-gray-100 bg-white">
+                <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                   <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                    <Phone size={16} className="text-gray-400" />
-                    基本信息
+                    <ShieldCheck size={18} className="text-[#1890ff]" />
+                    质检详情
                   </h4>
-                  <div className="grid grid-cols-2 gap-4 text-xs">
-                    <div className="space-y-1">
-                      <p className="text-gray-400">客户号码</p>
-                      <p className="text-gray-700 font-medium">{selectedRecord.phoneNumber}</p>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                  {/* Key Points */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <span className="bg-red-50 text-red-500 text-[10px] px-2 py-0.5 rounded font-bold">关键点</span>
+                      <span className="text-xs text-gray-400">工单质检</span>
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-gray-400">通话时长</p>
-                      <p className="text-gray-700 font-medium">{selectedRecord.duration}s</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-gray-400">创建人</p>
-                      <p className="text-gray-700 font-medium">{selectedRecord.creator}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-gray-400">话术模板</p>
-                      <p className="text-gray-700 font-medium truncate" title={selectedRecord.template}>{selectedRecord.template}</p>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Quality Hits */}
-                <section className="space-y-4">
-                  <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                    <ShieldCheck size={16} className="text-[#1890ff]" />
-                    质检命中详情
-                  </h4>
-                  <div className="space-y-3">
-                    {selectedRecord.qualityHits.map((hit, idx) => (
-                      <div key={idx} className="p-3 bg-gray-50 rounded border border-gray-100 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <span className={cn(
-                            "text-[10px] px-1.5 py-0.5 rounded",
-                            hit.type === '关键点' ? "bg-red-50 text-red-500" : "bg-blue-50 text-blue-500"
-                          )}>
-                            {hit.type}
-                          </span>
-                          <span className="text-[10px] text-gray-600 bg-white px-1.5 py-0.5 rounded border border-gray-100">
-                            {hit.issue}
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-gray-500 leading-relaxed">
-                          <span className="text-orange-600 font-medium">原因：</span>
-                          {hit.reason}
-                        </p>
-                      </div>
-                    ))}
-                    {selectedRecord.qualityHits.length === 0 && (
-                      <div className="text-center py-4 text-xs text-gray-400 bg-gray-50 rounded border border-dashed border-gray-200">
-                        暂无质检命中
-                      </div>
-                    )}
-                  </div>
-                </section>
-
-                {/* Captured Info */}
-                <section className="space-y-4">
-                  <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                    <Edit2 size={16} className="text-orange-500" />
-                    捕捉信息明细
-                  </h4>
-                  <div className="border border-gray-100 rounded overflow-hidden">
-                    <table className="w-full text-xs">
-                      <tbody>
-                        {selectedRecord.capturedInfo.map((info, idx) => (
-                          <tr key={idx} className="border-b border-gray-50 last:border-0">
-                            <td className="w-1/3 p-3 bg-gray-50 text-gray-600 border-r border-gray-50 font-medium">{info.key}</td>
-                            <td className="w-2/3 p-0">
-                              {info.key.includes('本人') || info.key.includes('参加') ? (
-                                <select 
-                                  value={info.value}
-                                  onChange={(e) => {
-                                    const newVal = e.target.value;
-                                    setRecords(prev => prev.map(r => r.id === selectedRecord.id ? {
-                                      ...r,
-                                      capturedInfo: r.capturedInfo.map((ci, i) => i === idx ? { ...ci, value: newVal } : ci)
-                                    } : r));
-                                    setSelectedRecord(prev => prev ? {
-                                      ...prev,
-                                      capturedInfo: prev.capturedInfo.map((ci, i) => i === idx ? { ...ci, value: newVal } : ci)
-                                    } : null);
-                                  }}
-                                  className="w-full p-3 outline-none bg-blue-50/30 text-gray-700 cursor-pointer"
-                                >
-                                  <option value={info.value}>{info.value || '请选择'}</option>
-                                  <option value="是">是</option>
-                                  <option value="否">否</option>
-                                  <option value="不确定">不确定</option>
-                                </select>
-                              ) : (
-                                <div className="w-full p-3 text-gray-700">{info.value || '-'}</div>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </section>
-
-                {/* Summary */}
-                <section>
-                  <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <MessageSquare size={16} className="text-gray-400" />
-                    通话概括
-                  </h4>
-                  <div className="text-xs text-gray-600 leading-relaxed bg-gray-50 p-3 rounded border border-gray-100">
-                    {selectedRecord.summary || '暂无概要内容'}
-                  </div>
-                </section>
-
-                {/* Traceability / Operation Log */}
-                <section className="space-y-4">
-                  <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                    <Clock size={16} className="text-gray-400" />
-                    留痕登记
-                  </h4>
-                  <div className="space-y-3">
-                    {[
-                      { user: '系统管理员', action: '将“答非所问”状态修改为已处理', time: '2024-03-20 14:30' },
-                      { user: '系统管理员', action: '选择修改工单，工单质检状态为已修改', time: '2024-03-20 14:35' },
-                      { user: '系统管理员', action: '选择不修改工单，工单质检状态为已修改', time: '2024-03-20 14:40' },
-                    ].map((log, idx) => (
-                      <div key={idx} className="flex gap-3 text-[10px] relative">
-                        {idx !== 2 && <div className="absolute left-1.5 top-4 bottom-[-12px] w-0.5 bg-gray-100" />}
-                        <div className="w-3 h-3 rounded-full bg-blue-100 border-2 border-white shadow-sm z-10 mt-0.5" />
-                        <div className="flex-1 space-y-1">
-                          <p className="text-gray-700">
-                            <span className="font-bold mr-1">{log.user}</span>
-                            {log.action}
+                    <div className="space-y-4">
+                      {selectedRecord.qualityInspection?.keyPoints.map((point, idx) => (
+                        <div key={idx} className="bg-gray-50/50 border border-gray-100 rounded-lg p-4 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-gray-700">第 {point.roundNo} 轮</span>
+                              <span className="text-[10px] bg-white border border-gray-200 px-1.5 py-0.5 rounded text-gray-500">{point.ruleName}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] text-gray-400">是否关联:</span>
+                              <span className={cn(
+                                "text-[10px] font-bold",
+                                point.isAssociated === '是' ? "text-emerald-500" : "text-gray-400"
+                              )}>{point.isAssociated}</span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-600 leading-relaxed">
+                            <span className="text-orange-500 font-bold mr-1">命中原因:</span>
+                            {point.reason}
                           </p>
-                          <p className="text-gray-400">{log.time}</p>
+                          {point.affectedRounds.length > 0 && (
+                            <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                              <span className="text-[10px] text-gray-400">影响轮次列表:</span>
+                              <div className="flex gap-1">
+                                {point.affectedRounds.map(r => (
+                                  <span key={r} className="text-[10px] bg-blue-50 text-blue-600 px-1.5 rounded">第 {r} 轮</span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </section>
 
-                {/* Work Order Tags Editing */}
-                <section>
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                      <Filter size={16} className="text-gray-400" />
-                      工单标签
-                    </h4>
-                    {isEditingWorkOrder && (
-                      <button 
-                        onClick={() => {
-                          setRecords(prev => prev.map(r => r.id === selectedRecord.id ? { ...r, workOrderTags: tempWorkOrderTags, status: '已处理' } : r));
-                          setSelectedRecord(prev => prev ? { ...prev, workOrderTags: tempWorkOrderTags, status: '已处理' } : null);
-                          setIsEditingWorkOrder(false);
-                        }}
-                        className="text-[#1890ff] text-xs hover:underline"
-                      >
-                        保存
-                      </button>
+                  {/* Non-Key Points */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <span className="bg-blue-50 text-blue-500 text-[10px] px-2 py-0.5 rounded font-bold">非关键点</span>
+                      <span className="text-xs text-gray-400">重复追问</span>
+                    </div>
+                    {selectedRecord.qualityInspection?.nonKeyPoints.length === 0 ? (
+                      <div className="bg-gray-50/30 border border-dashed border-gray-200 rounded-lg p-4 text-center text-xs text-gray-400">
+                        暂无非关键点命中
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {selectedRecord.qualityInspection?.nonKeyPoints.map((point, idx) => (
+                          <div key={idx} className="bg-gray-50/50 border border-gray-100 rounded-lg p-4 space-y-3">
+                            {/* Similar structure to key points */}
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
-                  {isEditingWorkOrder ? (
-                    <div className="space-y-2">
-                      <textarea 
-                        value={tempWorkOrderTags.join(',')}
-                        onChange={(e) => setTempWorkOrderTags(e.target.value.split(',').filter(t => t.trim()))}
-                        className="w-full p-2 text-xs border border-gray-200 rounded outline-none focus:border-[#1890ff] min-h-[60px]"
-                        placeholder="输入标签，用逗号隔开"
-                      />
-                    </div>
+                </div>
+                {/* Middle Footer Buttons */}
+                <div className="p-4 border-t border-gray-100 flex gap-3 bg-white">
+                  <button className="flex-1 py-2 border border-[#1890ff] text-[#1890ff] rounded text-sm hover:bg-blue-50 transition-colors">
+                    需修改工单
+                  </button>
+                  <button className="flex-1 py-2 bg-[#1890ff] text-white rounded text-sm hover:bg-[#40a9ff] transition-colors">
+                    不需要
+                  </button>
+                </div>
+              </div>
+
+              {/* Column 3: Details & Info (Right) */}
+              <div className="w-[450px] flex flex-col bg-white">
+                {/* Tabs Header */}
+                <div className="flex border-b border-gray-100 shrink-0">
+                  <button 
+                    onClick={() => setActiveTab('detail')}
+                    className={cn(
+                      "flex-1 py-3 text-sm font-bold transition-all border-b-2",
+                      activeTab === 'detail' ? "text-[#1890ff] border-[#1890ff]" : "text-gray-400 border-transparent hover:text-gray-600"
+                    )}
+                  >
+                    外呼明细
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('revision')}
+                    className={cn(
+                      "flex-1 py-3 text-sm font-bold transition-all border-b-2",
+                      activeTab === 'revision' ? "text-[#1890ff] border-[#1890ff]" : "text-gray-400 border-transparent hover:text-gray-600"
+                    )}
+                  >
+                    修订记录
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-6 space-y-8">
+                  {activeTab === 'detail' ? (
+                    <>
+                      {/* Outbound Info */}
+                      <section className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm font-bold text-gray-800">
+                          <div className="w-1 h-4 bg-[#1890ff] rounded-full" />
+                          外呼信息
+                          <span className="ml-auto text-[10px] text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">回援呼入</span>
+                        </div>
+                        <div className="grid grid-cols-1 gap-3 text-xs">
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">业务话术</span>
+                            <span className="text-gray-700 font-medium">企业年报</span>
+                          </div>
+                        </div>
+                      </section>
+
+                      {/* Customer Info */}
+                      <section className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm font-bold text-gray-800">
+                          <User size={16} className="text-gray-400" />
+                          客户信息
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-400">号码</span>
+                          <span className="text-gray-700 font-medium">132****7714</span>
+                        </div>
+                      </section>
+
+                      {/* Call Records Timeline */}
+                      <section className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm font-bold text-gray-800">
+                          <Clock size={16} className="text-gray-400" />
+                          通话记录
+                        </div>
+                        <div className="space-y-4 pl-2">
+                          <div className="relative pl-6 border-l border-gray-100">
+                            <div className="absolute left-[-4.5px] top-0 w-2 h-2 rounded-full bg-gray-200" />
+                            <div className="text-[10px] text-gray-400 mb-1">上次通话时间：2026-03-20 14:30</div>
+                            <div className="space-y-1 text-[10px] text-gray-500">
+                              <p>通话状态：<span className="text-emerald-500">已接</span></p>
+                              <p>通话时长：6s</p>
+                              <p>通话概要：确认周一前往，需用餐，无海鲜过敏，无其他特殊要求。</p>
+                            </div>
+                          </div>
+                          <div className="relative pl-6 border-l border-gray-100">
+                            <div className="absolute left-[-4.5px] top-0 w-2 h-2 rounded-full bg-[#1890ff]" />
+                            <div className="text-[10px] text-gray-400 mb-1">本次通话时间：2026-04-03 14:35</div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">回援呼入</span>
+                              <span className="text-[10px] text-gray-500">6s</span>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+
+                      {/* Captured Info Detail */}
+                      <section className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 text-sm font-bold text-gray-800">
+                            <ShieldCheck size={16} className="text-orange-500" />
+                            捕捉信息明细
+                          </div>
+                          <input type="checkbox" checked readOnly className="rounded text-[#1890ff]" />
+                        </div>
+                        <div className="border border-gray-100 rounded overflow-hidden">
+                          <table className="w-full text-xs">
+                            <tbody>
+                              {[
+                                { key: '参加体检', value: '是' },
+                                { key: '是否在院内用餐', value: '是' },
+                                { key: '预约时间', value: '周一 上午' },
+                                { key: '知悉体检注意事项', value: '是' },
+                              ].map((info, idx) => (
+                                <tr key={idx} className="border-b border-gray-50 last:border-0">
+                                  <td className="w-1/2 p-3 bg-gray-50 text-gray-600 border-r border-gray-50 font-medium">{info.key}</td>
+                                  <td className="w-1/2 p-3 text-gray-700 flex items-center justify-between">
+                                    {info.value}
+                                    <ChevronDown size={12} className="text-gray-300" />
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-[10px] text-gray-400">其他需求</p>
+                          <div className="flex flex-wrap gap-2">
+                            {['# 忌口：葱', '# 海鲜过敏', '# 需温水'].map(tag => (
+                              <span key={tag} className="text-[10px] text-blue-500">{tag}</span>
+                            ))}
+                          </div>
+                        </div>
+                      </section>
+
+                      {/* Call Summary */}
+                      <section className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm font-bold text-gray-800">
+                          <MessageSquare size={16} className="text-blue-400" />
+                          通话概要
+                        </div>
+                        <div className="text-xs text-gray-600 leading-relaxed bg-gray-50 p-3 rounded border border-gray-100">
+                          确认周一前往，需用餐，对海鲜过敏，无其他特殊要求。
+                        </div>
+                      </section>
+                    </>
                   ) : (
-                    <div className="flex flex-wrap gap-1">
-                      {selectedRecord.workOrderTags.map(tag => (
-                        <span key={tag} className="text-[10px] bg-blue-50 text-[#1890ff] px-1.5 py-0.5 rounded border border-blue-100">
-                          {tag}
-                        </span>
-                      ))}
-                      {selectedRecord.workOrderTags.length === 0 && <span className="text-xs text-gray-300">暂无标签</span>}
-                    </div>
+                    <div className="text-center py-20 text-gray-400 text-sm">暂无修订记录</div>
                   )}
-                </section>
+                </div>
+
+                {/* Right Footer Buttons */}
+                <div className="p-4 border-t border-gray-100 flex justify-end gap-3 bg-white">
+                  <button onClick={() => setSelectedRecord(null)} className="px-6 py-2 border border-gray-200 text-gray-600 rounded text-sm hover:bg-gray-50 transition-colors">
+                    取消
+                  </button>
+                  <button className="px-6 py-2 bg-[#1890ff] text-white rounded text-sm hover:bg-[#40a9ff] transition-colors shadow-lg shadow-blue-100">
+                    保存
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Bottom Action Buttons */}
-            <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 bg-white">
-              <button 
-                onClick={() => {
-                  setIsEditingWorkOrder(true);
-                  setTempWorkOrderTags(selectedRecord.workOrderTags);
-                }}
-                className="px-6 py-2 border border-[#1890ff] text-[#1890ff] rounded text-sm hover:bg-blue-50 transition-colors"
-              >
-                需修改工单
+            {/* Bottom Navigation */}
+            <div className="px-6 py-3 border-t border-gray-100 flex justify-center gap-4 bg-white shrink-0">
+              <button className="px-8 py-1.5 border border-gray-200 text-gray-600 rounded-full text-sm hover:bg-gray-50 transition-colors">
+                上一通话
               </button>
-              <button 
-                onClick={() => {
-                  setRecords(prev => prev.map(r => r.id === selectedRecord.id ? { ...r, status: '已处理' } : r));
-                  setSelectedRecord(prev => prev ? { ...prev, status: '已处理' } : null);
-                  setSelectedRecord(null);
-                }}
-                className="px-6 py-2 bg-[#1890ff] text-white rounded text-sm hover:bg-[#40a9ff] transition-colors"
-              >
-                不需要
+              <button className="px-8 py-1.5 border border-gray-200 text-gray-600 rounded-full text-sm hover:bg-gray-50 transition-colors">
+                下一通话
               </button>
             </div>
           </motion.div>

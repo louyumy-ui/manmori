@@ -130,7 +130,7 @@ export const QualityRerunList: React.FC<QualityRerunListProps> = ({ onViewDetail
                 <th className="px-4 py-4 text-sm font-semibold text-gray-800">人设版本</th>
                 <th className="px-4 py-4 text-sm font-semibold text-gray-800">质检版本</th>
                 <th className="px-4 py-4 text-sm font-semibold text-gray-800">重跑次数</th>
-                <th className="px-4 py-4 text-sm font-semibold text-gray-800">最新命中结果</th>
+                <th className="px-4 py-4 text-sm font-semibold text-gray-800">是否有问题</th>
                 <th className="px-4 py-4 text-sm font-semibold text-gray-800">重跑时间</th>
                 <th className="px-4 py-4 text-sm font-semibold text-gray-800">操作人</th>
                 <th className="px-4 py-4 text-sm font-semibold text-gray-800">状态</th>
@@ -166,7 +166,6 @@ export const QualityRerunList: React.FC<QualityRerunListProps> = ({ onViewDetail
                       )}>
                         {record.latestResult}
                       </span>
-                      <span className="text-[10px] text-gray-400">第 {record.rerunCount} 次质检</span>
                     </div>
                   </td>
                   <td className="px-4 py-4 text-sm text-gray-500">{record.rerunTime}</td>
